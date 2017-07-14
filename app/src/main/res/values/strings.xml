@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">0317MOACNS1C-01</string>
+    <string name="title_activity_detalle">DetalleActivity</string>
+    <string name="com.twitter.sdk.android.CONSUMER_KEY">YISD6AZyXXeIhl2WtjxwFiVC6</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET">SeHn0MdSnv4hdH9csV4rAfGA7SkhMd3gLfyTw0ksgpEP1b6hfV</string>
+
+    <string name="player_error">Error initializing YouTube player: %s</string>
+    <string name="seek_to">Jump To</string>
+    <string name="seek_to_hint">Seconds</string>
+    <string name="drawer_open">Drawer Open</string>
+    <string name="drawer_close">Drawer Close</string>
+
+</resources>

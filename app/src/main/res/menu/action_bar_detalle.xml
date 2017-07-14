@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="favoritos"
+        android:id="@+id/estrellaFavoritos"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_favorite_border_black_24dp"
+        >
+
+
+    </item>
+
+
+    <item
+
+        android:title="Compartir"
+        android:id="@+id/botonCompartir"
+        app:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_menu_share">
+
+        </item>
+
+
+
+
+
+
+
+</menu>

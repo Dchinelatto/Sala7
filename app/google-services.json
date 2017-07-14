@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "843014596145",
+    "firebase_url": "https://salasiete-e869b.firebaseio.com",
+    "project_id": "salasiete-e869b",
+    "storage_bucket": "salasiete-e869b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843014596145:android:585f8b960f6c34f6",
+        "android_client_info": {
+          "package_name": "digitalhouse.android.a0317moacns1c_01"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843014596145-04p5cl7h3s8arru2sk16p7u0782r3fvh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "digitalhouse.android.a0317moacns1c_01",
+            "certificate_hash": "55e585ee89075e4fa872073991230cf3938bf4dd"
+          }
+        },
+        {
+          "client_id": "843014596145-0n19j319r2ta2h5h68c90cmgp9eat3nn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOAuAAh9q8TNWHuPI-OOVbmfXJxqbdxrU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843014596145-0n19j319r2ta2h5h68c90cmgp9eat3nn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843014596145:android:56819c06ea16ae28",
+        "android_client_info": {
+          "package_name": "com.example.dh2.entregablefirebasedanilo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "843014596145-4298v0t1p2o32918ljh9k6g4taklf053.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.dh2.entregablefirebasedanilo",
+            "certificate_hash": "55e585ee89075e4fa872073991230cf3938bf4dd"
+          }
+        },
+        {
+          "client_id": "843014596145-0n19j319r2ta2h5h68c90cmgp9eat3nn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBOAuAAh9q8TNWHuPI-OOVbmfXJxqbdxrU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "843014596145-0n19j319r2ta2h5h68c90cmgp9eat3nn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
