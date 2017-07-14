@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -45,9 +46,7 @@ public class LoginFragment extends Fragment {
     private FirebaseAuth mAuth;
 
     private TwitterLoginButton loginButton;
-    private Button button;
-    private EditText editText;
-
+    private ProgressBar progressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,6 +80,9 @@ public class LoginFragment extends Fragment {
                 updateUI(null);
             }
         });
+
+        progressBar = (ProgressBar) view.findViewById(R.id.progressbar);
+        progressBar.setVisibility(View.GONE);
 
 
         return view;
@@ -161,6 +163,14 @@ public class LoginFragment extends Fragment {
         updateUI(currentUser);
     }
 
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        loginButton.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+        progressBar.setIndeterminate(true);
+    }
 }
 
 

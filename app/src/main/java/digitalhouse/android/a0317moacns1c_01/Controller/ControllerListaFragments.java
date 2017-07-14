@@ -13,12 +13,12 @@ import digitalhouse.android.a0317moacns1c_01.View.Fragments.DetalleFragment;
 public class ControllerListaFragments {
 
 
-    public List<DetalleFragment> generarListaFragments(List<Media> listaMedia, Integer generoID) {
+    public List<DetalleFragment> generarListaFragments(List<Media> listaMedia, Integer generoID, String tipoMedia) {
 
 
         DAOListaFragments elDAOListaFrag = new DAOListaFragments();
 
-        List<DetalleFragment> listaFragments = elDAOListaFrag.generarListaFragments(listaMedia, generoID);
+        List<DetalleFragment> listaFragments = elDAOListaFrag.generarListaFragments(listaMedia, generoID, tipoMedia);
 
         return listaFragments;
     }

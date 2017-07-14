@@ -107,7 +107,7 @@ public class DetalleActivity extends AppCompatActivity implements DetalleFragmen
                 }
 
                 ControllerListaFragments elControllerListaFragment = new ControllerListaFragments();
-                listaFragments = elControllerListaFragment.generarListaFragments(listaMedia, generoID);
+                listaFragments = elControllerListaFragment.generarListaFragments(listaMedia, generoID, tipoMedia);
 
                 // SETEO EL TITULO DE LA ACTIVITY
                 getSupportActionBar().setTitle(TMDBHelper.getNombreGenero(generoID.toString()));

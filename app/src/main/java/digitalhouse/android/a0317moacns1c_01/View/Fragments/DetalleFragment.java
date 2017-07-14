@@ -47,6 +47,7 @@ public class DetalleFragment extends Fragment {
     public static final String IMAGEN = "imagen";
     public static final String FAVORITO= "favorito";
     public static final String MEDIA_ID = "id";
+    public static final String TIPO_MEDIA = "tipo_media";
 
     // ATRIBUTOS
     private String nombre;
@@ -56,6 +57,7 @@ public class DetalleFragment extends Fragment {
     private String imagen;
     private Integer favoritos;
     private Integer mediaId;
+    private String tipoMedia;
 
     private ReceptorDeYoutube receptorDeYoutube;
     private FirebaseUser firebaseUser;
@@ -94,7 +96,8 @@ public class DetalleFragment extends Fragment {
             calif = elBundle.getDouble(CALIFICACION);
             imagen = elBundle.getString(IMAGEN);
             favoritos= elBundle.getInt(FAVORITO);
-            mediaId= elBundle.getInt(MEDIA_ID);
+            mediaId = elBundle.getInt(MEDIA_ID);
+            tipoMedia = elBundle.getString(TIPO_MEDIA);
 
 
         } else {
@@ -105,6 +108,7 @@ public class DetalleFragment extends Fragment {
             imagen = savedInstanceState.getString(IMAGEN);
             favoritos = savedInstanceState.getInt(FAVORITO);
             mediaId= savedInstanceState.getInt(MEDIA_ID);
+            tipoMedia= savedInstanceState.getString(TIPO_MEDIA);
 
         }
 
@@ -118,6 +122,7 @@ public class DetalleFragment extends Fragment {
         TextView textViewDesc = (TextView) laView.findViewById(R.id.textView_detalle_descripcion);
         ImageView imageViewImagen = (ImageView) laView.findViewById(R.id.textView_detalle_imagen);
         TextView textViewCalif = (TextView) laView.findViewById(R.id.textView_detalle_calificacion);
+        TextView textViewYoutube = (TextView) laView.findViewById(R.id.textView_detalle_trailer);
 
 
         // CARGO LAS VIEWS
@@ -126,6 +131,12 @@ public class DetalleFragment extends Fragment {
         textViewCalif.setText(String.format("%1.1f", calif));
         String imagenURL = TMDBHelper.getImagePoster(TMDBHelper.IMAGE_SIZE_W300, imagen);
         Picasso.with(getContext()).load(imagenURL).placeholder(R.drawable.generico).error(R.drawable.generico).into(imageViewImagen);
+
+        // HAGO DESAPARECER LA OPCION DE YOUTUBE SI ES UNA SERIE
+        if(tipoMedia.equals("serie")){
+            imageViewYouTube.setVisibility(View.GONE);
+            textViewYoutube.setVisibility(View.GONE);
+        }
 
 
         imageViewYouTube.setOnClickListener(new View.OnClickListener() {
@@ -232,6 +243,7 @@ public class DetalleFragment extends Fragment {
         outState.putString(IMAGEN, imagen);
         outState.putInt(FAVORITO,favoritos);
         outState.putInt(MEDIA_ID,mediaId);
+        outState.putString(TIPO_MEDIA,tipoMedia);
     }
 
 

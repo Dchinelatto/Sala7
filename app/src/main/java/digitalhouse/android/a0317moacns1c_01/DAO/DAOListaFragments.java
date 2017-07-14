@@ -22,7 +22,7 @@ public class DAOListaFragments {
 
 
     // METODO PROPIO PARA CREAR LA LISTA DE FRAGMENTS DETALLE
-    public List<DetalleFragment> generarListaFragments(List<Media> listaMedia, Integer generoID) {
+    public List<DetalleFragment> generarListaFragments(List<Media> listaMedia, Integer generoID, String tipoMedia) {
 
         List<DetalleFragment> listaFragments = new ArrayList<>();
 
@@ -45,6 +45,7 @@ public class DAOListaFragments {
             elBundle.putString(DetalleFragment.IMAGEN, cadaMedia.getImagen());
             elBundle.putInt(DetalleFragment.FAVORITO, cadaMedia.getFavorito());
             elBundle.putInt(DetalleFragment.MEDIA_ID,cadaMedia.getId());
+            elBundle.putString(DetalleFragment.TIPO_MEDIA,tipoMedia);
 
 
             listaFragments.add(DetalleFragment.detalleFragmentCreator(elBundle));
