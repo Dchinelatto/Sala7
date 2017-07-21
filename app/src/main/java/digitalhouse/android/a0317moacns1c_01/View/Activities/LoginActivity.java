@@ -12,7 +12,7 @@ import com.google.firebase.auth.FirebaseUser;
 import digitalhouse.android.a0317moacns1c_01.R;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.LoginFragment;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginFragment.Retornador{
 
     private FirebaseAuth mAuth;
     private LoginFragment loginFragment;
@@ -62,5 +62,11 @@ public class LoginActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         loginFragment.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+    @Override
+    public void retroceder() {
+        onBackPressed();
     }
 }

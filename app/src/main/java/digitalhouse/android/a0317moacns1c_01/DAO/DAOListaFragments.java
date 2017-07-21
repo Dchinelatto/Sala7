@@ -46,6 +46,7 @@ public class DAOListaFragments {
             elBundle.putInt(DetalleFragment.FAVORITO, cadaMedia.getFavorito());
             elBundle.putInt(DetalleFragment.MEDIA_ID,cadaMedia.getId());
             elBundle.putString(DetalleFragment.TIPO_MEDIA,tipoMedia);
+            elBundle.putString(DetalleFragment.VIDEO,cadaMedia.getVideo());
 
 
             listaFragments.add(DetalleFragment.detalleFragmentCreator(elBundle));

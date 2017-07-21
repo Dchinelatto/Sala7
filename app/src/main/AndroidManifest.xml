@@ -30,6 +30,7 @@
         <activity android:name=".View.Activities.FavoritosActivity" />
         <activity android:name=".View.Activities.YouTubeActivity" />
         <activity android:name=".View.Activities.LoginActivity"></activity>
+        <activity android:name=".View.Activities.OnBoardingActivity"></activity>
     </application>
 
 </manifest>

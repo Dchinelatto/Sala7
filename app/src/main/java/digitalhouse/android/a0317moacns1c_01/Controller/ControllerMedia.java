@@ -2,10 +2,25 @@ package digitalhouse.android.a0317moacns1c_01.Controller;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterApiClient;
+import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import digitalhouse.android.a0317moacns1c_01.DAO.DAOFirebase;
 import digitalhouse.android.a0317moacns1c_01.DAO.DAOMediaInternet;
 import digitalhouse.android.a0317moacns1c_01.DAO.DAOTablaFavoritos;
 import digitalhouse.android.a0317moacns1c_01.DAO.DAOTablaGeneros;
@@ -51,8 +66,16 @@ public class ControllerMedia {
                 @Override
                 public void finish(List<Genero> resultado) {
 
+                    List<Genero> listaGeneros = new ArrayList<Genero>();
+                    for(Genero cadaGenero : resultado){
+                        if(cadaGenero.getName().equals("Western")||cadaGenero.getName().equals("Guerra")||cadaGenero.getName().equals("película de la televisión")||cadaGenero.getName().equals("Suspense")||cadaGenero.getName().equals("Historia")||cadaGenero.getName().equals("Documental")||cadaGenero.getName().equals("Crimen")||cadaGenero.getName().equals("Familia")||cadaGenero.getName().equals("Aventura")){
+                        } else {
+                            listaGeneros.add(cadaGenero);
 
-                    elDAOGeneros.cargarListaGeneros(resultado);
+                        }
+                    }
+
+                    elDAOGeneros.cargarListaGeneros(listaGeneros);
 
                     listenerDeLaView.finish(elDAOGeneros.traerListaGeneros());
                 }
@@ -99,8 +122,8 @@ public class ControllerMedia {
 
                             DAOTablaMedia elDAO = new DAOTablaMedia(elContexto);
                             elDAO.cargarListaMedia(resultado, genero.toString(), tipoMedia);
-                            List<Media> listaMedia = elDAO.traerListaMediaPorGenero(genero, tipoMedia);
-                            listenerDeLaView.finish(listaMedia);
+//                            List<Media> listaMedia = elDAO.traerListaMediaPorGenero(genero, tipoMedia);
+                            listenerDeLaView.finish(resultado);
                             page = page + 1;
                         }
                     }
@@ -126,29 +149,13 @@ public class ControllerMedia {
         return !endPaging;
     }
 
-//    public void traerListaMediaInternet(String busqueda, final ResultListener<List<Media>> listenerDeLaView){
-//
-//        DAOMediaInternet elDAO = new DAOMediaInternet();
-//        elDAO.traerListaMedia(busqueda, new ResultListener<List<Media>>() {
-//            @Override
-//            public void finish(List<Media> resultado) {
-//                listenerDeLaView.finish(resultado);
-//            }
-//        });
-//
-//
-//    }
 
 
-    // METODO PARA TRAER LA LISTA DE FAVORITOS
-    public List<Media> traerListaMedia() {
+    public void cargarMedia(Media media, String genero, String tipo){
 
-        List<Media> listaMedia;
+        DAOTablaMedia daoTablaMedia= new DAOTablaMedia(elContexto);
+        daoTablaMedia.cargarMedia(media,genero,tipo);
 
-        DAOTablaMedia elDAO = new DAOTablaMedia(elContexto);
-        listaMedia = elDAO.traerListaMedia();
-
-        return listaMedia;
     }
 
 
@@ -163,7 +170,10 @@ public class ControllerMedia {
     public void insertarFavorito(String userId, String mediaId) {
 
         DAOTablaFavoritos daoTablaFavoritos = new DAOTablaFavoritos(elContexto);
-        daoTablaFavoritos.insertarFavorito(elContexto, userId, mediaId);
+        daoTablaFavoritos.insertarFavorito(userId, mediaId);
+
+        DAOFirebase daoFirebase = new DAOFirebase();
+        daoFirebase.insertarFavoritoFirebase(userId, mediaId);
 
     }
 
@@ -172,14 +182,37 @@ public class ControllerMedia {
         DAOTablaFavoritos daoTablaFavoritos = new DAOTablaFavoritos(elContexto);
         daoTablaFavoritos.eliminarFavorito(userId, mediaId);
 
+        DAOFirebase daoFirebase = new DAOFirebase();
+        daoFirebase.eliminarFavoritoFirebase(userId, mediaId);
     }
 
 
-    public List<Media> obtenerListaFavoritos() {
+    public void obtenerListaFavoritos(final ResultListener<List<Media>> listenerDeLaView) {
 
-        DAOTablaFavoritos daoTablaFavoritos = new DAOTablaFavoritos(elContexto);
-        return daoTablaFavoritos.obtenerFavoritos();
+        final String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+        final DAOTablaFavoritos daoTablaFavoritos = new DAOTablaFavoritos(elContexto);
+
+        if(HTTPConnectionManager.isNetworkingOnline(elContexto)){
+
+            DAOFirebase daoFirebase = new DAOFirebase();
+            daoFirebase.obtenerFavoritosFirebase(userId, new ResultListener<List<String>>() {
+                @Override
+                public void finish(List<String> resultado) {
+
+
+                    daoTablaFavoritos.insertarVariosFavoritos(userId, resultado);
+
+                    listenerDeLaView.finish(daoTablaFavoritos.obtenerFavoritos());;
+                }
+            });
+
+        } else {
+
+            listenerDeLaView.finish(daoTablaFavoritos.obtenerFavoritos());
+
+
+        }
 
     }
 
@@ -204,6 +237,48 @@ public class ControllerMedia {
         return daoTablaFavoritos.chequearUsuarioYMedia(usuarioId, mediaId);
 
     }
+
+    public void traerBuscador(String busqueda, final ResultListener <List<Media>> listenerDeView) {
+
+        String json = TMDBHelper.getMultiSearch(TMDBHelper.language_SPANISH, busqueda);
+        if (HTTPConnectionManager.isNetworkingOnline(elContexto)) {
+            DAOMediaInternet daoMediaInternet = new DAOMediaInternet();
+            daoMediaInternet.traerListaMedia(json, new ResultListener<List<Media>>() {
+                @Override
+                public void finish(List<Media> resultado) {
+                    listenerDeView.finish(resultado);
+                }
+            });
+        } else {
+
+            Toast.makeText(elContexto, "No hay conexion a internet", Toast.LENGTH_SHORT).show();
+
+        }
+    }
+
+    public void bajarFotoTwitterYSubirFotoAFirebase(String usuarioID){
+
+
+        DAOFirebase daoFirebase = new DAOFirebase();
+        daoFirebase.bajarFotoTwitterYSubirFotoAFirebase(usuarioID);
+
+    }
+
+
+
+
+    public void obtenerFotoFirebase(String usuarioId, final ResultListener<String> listenerDeLaView) {
+
+
+        DAOFirebase daoFirebase = new DAOFirebase();
+        daoFirebase.obtenerFotoFirebase(usuarioId, new ResultListener<String>() {
+            @Override
+            public void finish(String resultado) {
+                listenerDeLaView.finish(resultado);
+            }
+        });
+    }
+
 
 }
 

@@ -3,13 +3,11 @@ package digitalhouse.android.a0317moacns1c_01.View.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,21 +15,21 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.squareup.picasso.Picasso;
 
 import digitalhouse.android.a0317moacns1c_01.Controller.ControllerMedia;
-import digitalhouse.android.a0317moacns1c_01.DAO.DAOTablaMedia;
-import digitalhouse.android.a0317moacns1c_01.Model.Media;
+import digitalhouse.android.a0317moacns1c_01.Model.Trailer;
 import digitalhouse.android.a0317moacns1c_01.R;
+import digitalhouse.android.a0317moacns1c_01.Utils.ResultListener;
 import digitalhouse.android.a0317moacns1c_01.Utils.TMDBHelper;
-import digitalhouse.android.a0317moacns1c_01.View.Activities.FavoritosActivity;
 import digitalhouse.android.a0317moacns1c_01.View.Activities.LoginActivity;
-import digitalhouse.android.a0317moacns1c_01.View.Activities.MainActivity;
 
 
 /**
@@ -45,11 +43,13 @@ public class DetalleFragment extends Fragment {
     public static final String GENERO = "genero";
     public static final String CALIFICACION = "calificacion";
     public static final String IMAGEN = "imagen";
-    public static final String FAVORITO= "favorito";
+    public static final String FAVORITO = "favorito";
     public static final String MEDIA_ID = "id";
     public static final String TIPO_MEDIA = "tipo_media";
+    public static final String VIDEO = "video";
+    public static final String ES_SERIE = "es_serie";
 
-    // ATRIBUTOS
+    // ATRIBUTOS DE LA MEDIA
     private String nombre;
     private String desc;
     private String genero;
@@ -58,12 +58,19 @@ public class DetalleFragment extends Fragment {
     private Integer favoritos;
     private Integer mediaId;
     private String tipoMedia;
+    private Boolean esSerie;
 
     private ReceptorDeYoutube receptorDeYoutube;
     private FirebaseUser firebaseUser;
+    private ControllerMedia controllerMedia;
 
+    private ProgressBar progressBar;
+    private LinearLayout linearLayout;
 
-    public static interface ReceptorDeYoutube{
+    // BOOLEAN PARA SABER SI LA MEDIA ESTA EN FAVORITOS
+    private Boolean esFavorito;
+
+    public interface ReceptorDeYoutube {
         void recibirMediaParaYoutube(Integer id);
     }
 
@@ -82,6 +89,10 @@ public class DetalleFragment extends Fragment {
         // INFLO LA VIEW
         View laView = inflater.inflate(R.layout.fragment_detalle, container, false);
 
+        progressBar = (ProgressBar) laView.findViewById(R.id.progressbar_detalle);
+        progressBar.setVisibility(View.GONE);
+        linearLayout = (LinearLayout) laView.findViewById(R.id.linearLayout_detalle);
+
         setHasOptionsMenu(true);
 
         // CHEQUEO SI HAY ALGO EN EL SAVEDINSTANCESTATE, SINO, CARGO LOS ATRIBUTOS POR PRIMERA VEZ
@@ -95,9 +106,16 @@ public class DetalleFragment extends Fragment {
             desc = elBundle.getString(DESCRIPCION);
             calif = elBundle.getDouble(CALIFICACION);
             imagen = elBundle.getString(IMAGEN);
-            favoritos= elBundle.getInt(FAVORITO);
+            favoritos = elBundle.getInt(FAVORITO);
             mediaId = elBundle.getInt(MEDIA_ID);
             tipoMedia = elBundle.getString(TIPO_MEDIA);
+
+            if(elBundle.getString(VIDEO) == null){
+                esSerie = true;
+            } else {
+                esSerie = false;
+            }
+
 
 
         } else {
@@ -107,13 +125,13 @@ public class DetalleFragment extends Fragment {
             calif = savedInstanceState.getDouble(CALIFICACION);
             imagen = savedInstanceState.getString(IMAGEN);
             favoritos = savedInstanceState.getInt(FAVORITO);
-            mediaId= savedInstanceState.getInt(MEDIA_ID);
-            tipoMedia= savedInstanceState.getString(TIPO_MEDIA);
+            mediaId = savedInstanceState.getInt(MEDIA_ID);
+            tipoMedia = savedInstanceState.getString(TIPO_MEDIA);
+            esSerie = savedInstanceState.getBoolean(ES_SERIE);
 
         }
 
-
-
+        // SETEAMOS EL TITULO
         getActivity().setTitle(genero);
 
         // TRAIGO LAS VIEWS
@@ -133,12 +151,13 @@ public class DetalleFragment extends Fragment {
         Picasso.with(getContext()).load(imagenURL).placeholder(R.drawable.generico).error(R.drawable.generico).into(imageViewImagen);
 
         // HAGO DESAPARECER LA OPCION DE YOUTUBE SI ES UNA SERIE
-        if(tipoMedia.equals("serie")){
+        if (tipoMedia.equals("serie") || esSerie.equals(true)) {
             imageViewYouTube.setVisibility(View.GONE);
             textViewYoutube.setVisibility(View.GONE);
         }
 
 
+        // SETEO UN LISTENER A LA IMAGEN DE YOUTUBE PARA QUE AL HACER CLICK AVISE A LA ACTIVITY
         imageViewYouTube.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -152,62 +171,71 @@ public class DetalleFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.action_bar_detalle,menu);
+        inflater.inflate(R.menu.action_bar_detalle, menu);
         super.onCreateOptionsMenu(menu, inflater);
 
         ControllerMedia controllerMedia = new ControllerMedia(getContext());
 
-        if (firebaseUser != null){
+        // SI HAY USUARIO Y LA MEDIA ESTA EN FAVORITOS, LA MARCAMOS CON CORAZON RELLENO
+        if (firebaseUser != null) {
 
-            if(controllerMedia.chequearUsuarioYMedia(firebaseUser.getUid(), mediaId.toString())){
+            if (esFavorito) {
 
                 menu.findItem(R.id.estrellaFavoritos).setIcon(R.drawable.ic_favorite_black_24dp);
 
             }
-
         }
-
     }
 
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
 
-        final ControllerMedia controllerMedia= new ControllerMedia(getContext());
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
-        final FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
 
-        if(firebaseUser == null) {
-               Intent intent= new Intent(getActivity(), LoginActivity.class);
-               startActivity(intent);
-        } else {
-            final String userId = firebaseUser.getUid();
+        if (item.getItemId() == R.id.estrellaFavoritos) {
 
-        if (item.getItemId() == R.id.estrellaFavoritos && favoritos == 0) {
-           favoritos=1;
+            if (firebaseUser == null) {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                startActivity(intent);
+            } else {
+                final String userId = firebaseUser.getUid();
+
+                if (!esFavorito) {
 
 
-            controllerMedia.insertarFavorito(userId, mediaId.toString());
-            item.setIcon(R.drawable.ic_favorite_black_24dp);
+                    controllerMedia.insertarFavorito(userId, mediaId.toString());
+                    item.setIcon(R.drawable.ic_favorite_black_24dp);
+                    esFavorito = true;
 
 
-            Snackbar.make(getView(), "Agregado a favoritos", Snackbar.LENGTH_LONG)
-                    .setAction("Deshacer", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            favoritos = 0;
-                            item.setIcon(R.drawable.ic_favorite_border_black_24dp);
-                           controllerMedia.eliminarFavorito(userId, mediaId.toString());
-                        }
-                    }).show();
+                    Snackbar.make(getView(), "Agregado a favoritos", Snackbar.LENGTH_LONG)
+                            .setAction("Deshacer", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    esFavorito = false;
+                                    item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+                                    controllerMedia.eliminarFavorito(userId, mediaId.toString());
+                                }
+                            }).show();
 
-        } else if (item.getItemId() == R.id.estrellaFavoritos && favoritos == 1) {
+                } else if (esFavorito) {
 
-            item.setIcon(R.drawable.ic_favorite_border_black_24dp);
-            favoritos = 0;
-            controllerMedia.eliminarFavorito(userId, mediaId.toString());
-        } else if(item.getItemId() == R.id.botonCompartir){
+                    item.setIcon(R.drawable.ic_favorite_border_black_24dp);
+                    controllerMedia.eliminarFavorito(userId, mediaId.toString());
+                    esFavorito = false;
 
+
+                }
+            }
+
+        } else if (item.getItemId() == R.id.botonCompartir) {
+
+            mostrarProgressBar();
+
+            // HAGO DESAPARECER LA OPCION DE YOUTUBE SI ES UNA SERIE
+            if (tipoMedia.equals("serie")) {
+
+                String imagenURL = TMDBHelper.getImagePoster(TMDBHelper.IMAGE_SIZE_W300, imagen);
 
                 //Creamos un share de tipo ACTION_SENT
                 Intent share = new Intent(android.content.Intent.ACTION_SEND);
@@ -216,20 +244,56 @@ public class DetalleFragment extends Fragment {
                 share.setType("text/plain");
 
                 //Le agrego un título
-                share.putExtra(Intent.EXTRA_SUBJECT, "Youtube Video");
+                share.putExtra(Intent.EXTRA_SUBJECT, "Poster Serie");
                 //Le agrego el texto a compartir (Puede ser un link tambien)
 
-                share.putExtra(Intent.EXTRA_TEXT, "https://www.clarin.com/politica/randazzo-rompe-silencio-habla-primera-vez-precandidato-senador_0_B1WbS9z4W.html");
+                share.putExtra(Intent.EXTRA_TEXT, imagenURL);
 
                 //Hacemos un start para que comparta el contenido.
-                startActivity(Intent.createChooser(share, "Share link!"));
+                startActivity(Intent.createChooser(share, "Cómo lo compartimos?"));
 
-        }}
+                ocultarProgressBar();
+
+            } else {
+
+                ControllerMedia controllerMedia = new ControllerMedia(getContext());
+                controllerMedia.traerTrailer(mediaId, new ResultListener<Trailer>() {
+                    @Override
+                    public void finish(Trailer resultado) {
+
+                        String trailerKey = resultado.getTrailer();
+
+                        //Creamos un share de tipo ACTION_SENT
+                        Intent share = new Intent(android.content.Intent.ACTION_SEND);
+
+                        //Indicamos que voy a compartir texto
+                        share.setType("text/plain");
+
+                        //Le agrego un título
+                        share.putExtra(Intent.EXTRA_SUBJECT, "Youtube Video");
+                        //Le agrego el texto a compartir (Puede ser un link tambien)
+
+                        share.putExtra(Intent.EXTRA_TEXT, "https://www.youtube.com/watch?v=" + trailerKey);
+
+                        //Hacemos un start para que comparta el contenido.
+                        startActivity(Intent.createChooser(share, "Cómo lo compartimos?"));
+
+                        ocultarProgressBar();
+                    }
+                });
+
+            }
+
+
+
+
+        }
+
+
 
         return super.onOptionsItemSelected(item);
+
     }
-
-
 
 
     // OVERRIDE DEL ONSAVEINSTANCESTATE POR SI SE GIRA EL TELEFONO
@@ -241,21 +305,37 @@ public class DetalleFragment extends Fragment {
         outState.putString(GENERO, genero);
         outState.putDouble(CALIFICACION, calif);
         outState.putString(IMAGEN, imagen);
-        outState.putInt(FAVORITO,favoritos);
-        outState.putInt(MEDIA_ID,mediaId);
-        outState.putString(TIPO_MEDIA,tipoMedia);
+        outState.putInt(FAVORITO, favoritos);
+        outState.putInt(MEDIA_ID, mediaId);
+        outState.putString(TIPO_MEDIA, tipoMedia);
+        outState.putBoolean(ES_SERIE, esSerie);
     }
 
 
     @Override
     public void onStart() {
         super.onStart();
+        // ACTUALIZO EL BOOLEAN DE FAVORITOS
+        controllerMedia = new ControllerMedia(getContext());
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if(firebaseUser != null){
+            esFavorito = controllerMedia.chequearUsuarioYMedia(firebaseUser.getUid(), mediaId.toString());
+        }
+
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         receptorDeYoutube = (ReceptorDeYoutube) context;
+    }
+
+    public void mostrarProgressBar(){
+        progressBar.setVisibility(View.VISIBLE);
+        linearLayout.setVisibility(View.GONE);
+    }
+    public void ocultarProgressBar(){
+        progressBar.setVisibility(View.GONE);
+        linearLayout.setVisibility(View.VISIBLE);
     }
 }

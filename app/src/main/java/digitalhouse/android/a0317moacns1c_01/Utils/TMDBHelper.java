@@ -74,8 +74,7 @@ public class TMDBHelper {
         return baseUrl + "/movie/" + movieID + "?api_key=" + apiKey +"&language="+language;
     }
 
-
-    // https://api.themoviedb.org/3//movie/297762/videos?api_key=0937113d999e46fcd683f3dece104000&language=en-US
+    // https://api.themoviedb.org/3/movie/297762/videos?api_key=0937113d999e46fcd683f3dece104000&language=en-US
     public static String getTrailerURL(String movideID,String language){
         return baseUrl + "/movie/" + movideID + "/videos?api_key=" +apiKey +"&language="+language;
     }
@@ -244,6 +243,13 @@ public class TMDBHelper {
     }
     public static String getTVAiringToday(String language, Integer page){
         return baseUrl + "/tv/airing_today?api_key=" + apiKey + "&language="+language + "&page=" +page.toString();
+
+    }
+
+    //api.themoviedb.org/3/search/multi?api_key=<<api_key>>&language=en-US&include_adult=false
+    public static String getMultiSearch(String language,String query){
+
+        return baseUrl + "/search/multi?api_key=" + apiKey + "&language=" + language + "&query=" + query + "&include_adult=false";
 
     }
 

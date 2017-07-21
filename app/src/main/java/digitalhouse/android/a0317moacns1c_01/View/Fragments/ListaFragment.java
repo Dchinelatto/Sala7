@@ -69,10 +69,10 @@ public abstract class ListaFragment extends Fragment implements RecyclerAdapter.
         elRecyclerView.setAdapter(elAdapter);
 
         elRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
+        swipeRefreshLayout = (SwipeRefreshLayout) laView.findViewById(R.id.swipeRefresh);
 
         cargarLista();
 
-        swipeRefreshLayout= (SwipeRefreshLayout) laView.findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {

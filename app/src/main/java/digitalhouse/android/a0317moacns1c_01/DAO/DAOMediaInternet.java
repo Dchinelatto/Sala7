@@ -22,7 +22,6 @@ public class DAOMediaInternet {
     public void traerListaMedia(String busqueda, ResultListener<List<Media>> listenerDelController){
 
 
-
         MiAsyncTask laTarea = new MiAsyncTask(listenerDelController,busqueda);
         laTarea.execute();
 
@@ -39,8 +38,6 @@ public class DAOMediaInternet {
             this.listenerDelController = listenerDelController;
             this.urlBusqueda = urlBusqueda;
         }
-
-        public void setUrlBusqueda(String urlBusqueda) {this.urlBusqueda = urlBusqueda;}
 
         @Override
         protected List<Media> doInBackground(String... strings) {

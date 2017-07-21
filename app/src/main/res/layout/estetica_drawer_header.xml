@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="110dp">
+    android:layout_height="150dp">
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
+        android:layout_height="150dp"
         android:rotation="180"
-        android:src="@drawable/header"/>
+        android:scaleType="centerCrop"
+        android:src="@drawable/header" />
 
-    <TextView
-        android:id="@+id/textView_headerUsuario"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Usuario Equis"
-        android:fontFamily="sans-serif"
         android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"
-        android:textStyle="bold"
-        android:textColor="@color/white"
-        android:textSize="20sp"/>
+        android:orientation="horizontal"
+        android:padding="16dp">
 
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/imageView_imagenUsuario"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:src="@drawable/spash_drawable"
+            app:civ_border_width="2dp"
+            app:civ_border_color="#FF000000"/>
+
+        <TextView
+            android:id="@+id/textView_headerUsuario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="16dp"
+            android:fontFamily="sans-serif"
+            android:text="Usuario Equis"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 </RelativeLayout>

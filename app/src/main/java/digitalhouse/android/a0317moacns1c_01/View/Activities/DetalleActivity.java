@@ -24,6 +24,7 @@ import digitalhouse.android.a0317moacns1c_01.Utils.TMDBHelper;
 import digitalhouse.android.a0317moacns1c_01.View.Adapters.DetalleViewPagerAdapter;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.DetalleFragment;
 import digitalhouse.android.a0317moacns1c_01.R;
+import digitalhouse.android.a0317moacns1c_01.View.Fragments.ListaResultados;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.YouTubeFragment;
 
 public class DetalleActivity extends AppCompatActivity implements DetalleFragment.ReceptorDeYoutube{
@@ -39,6 +40,7 @@ public class DetalleActivity extends AppCompatActivity implements DetalleFragmen
     private Integer generoID;
     private String tipoMedia;
     private Integer itemActual;
+    private String busqueda;
 
     private List<Media> listaMedia;
 
@@ -87,14 +89,39 @@ public class DetalleActivity extends AppCompatActivity implements DetalleFragmen
         // ACA HACEMOS UN IF PARA SEPARAR EL DETALLE DE FAVORITOS DEL DETALLE NORMAL
         if (generoID.equals(FavoritosActivity.CODIGO_FAVORITOS)) {
             ControllerMedia controllerMedia = new ControllerMedia(DetalleActivity.this);
-            listaMedia = controllerMedia.obtenerListaFavoritos();
+            controllerMedia.obtenerListaFavoritos(new ResultListener<List<Media>>() {
+                @Override
+                public void finish(List<Media> resultado) {
+                    for(Media cadaMedia : resultado){
+                        listaMedia.add(cadaMedia);
+                    }
+
+                    setearViewPager();
+                }
+            });
+
         }
 
 
 
 
-        ControllerMedia controllerMedia = new ControllerMedia(this);
+        final ControllerMedia controllerMedia = new ControllerMedia(this);
 
+
+        if(generoID.equals(ListaResultados.CODIGO_RESULTADOS)){
+
+            busqueda= tipoMedia;
+            controllerMedia.traerBuscador(busqueda, new ResultListener<List<Media>>() {
+                @Override
+                public void finish(List<Media> resultado) {
+                    Media media= resultado.get(itemActual);
+                    controllerMedia.cargarMedia(media,ListaResultados.CODIGO_RESULTADOS.toString(),null);
+                    listaMedia.add(media);
+                    setearViewPager();
+                }
+            });
+
+        } else if(!generoID.equals(ListaResultados.CODIGO_RESULTADOS) && !generoID.equals(FavoritosActivity.CODIGO_FAVORITOS) ){
 
         controllerMedia.traerListaMediaPorGenero(generoID, tipoMedia, new ResultListener<List<Media>>() {
             @Override
@@ -102,35 +129,15 @@ public class DetalleActivity extends AppCompatActivity implements DetalleFragmen
 
                 // ACA VOLVEMOS A HACER UN IF PARA SEPARAR EL DETALLE DE FAVORITOS DEL DETALLE NORMAL
                 if (!generoID.equals(FavoritosActivity.CODIGO_FAVORITOS)) {
-
                     listaMedia = resultado;
+                    setearViewPager();
                 }
-
-                ControllerListaFragments elControllerListaFragment = new ControllerListaFragments();
-                listaFragments = elControllerListaFragment.generarListaFragments(listaMedia, generoID, tipoMedia);
-
-                // SETEO EL TITULO DE LA ACTIVITY
-                getSupportActionBar().setTitle(TMDBHelper.getNombreGenero(generoID.toString()));
-
-                // TRAIGO EL VIEWPAGER
-                viewPager = (ViewPager) findViewById(R.id.viewPager_fragmentDetalle);
-
-                // INSTANCIO EL ADAPTER
-                DetalleViewPagerAdapter elAdapter = new DetalleViewPagerAdapter(getSupportFragmentManager(), listaFragments);
-
-                // SETEO EL ADAPTER AL VIEWPAGER
-                viewPager.setAdapter(elAdapter);
-
-                // SETEO EL ITEM SELECCIONADO DE LA LISTA COMO CURRENT ITEM
-                viewPager.setCurrentItem(itemActual);
-
-                // AGREGO SEPARACION ENTRE CELDAS
-                viewPager.setClipToPadding(false);
-                viewPager.setPageMargin(2);
             }
+
+
         });
 
-    }
+    }}
 
     @Override
     public void recibirMediaParaYoutube(Integer id) {
@@ -146,6 +153,33 @@ public class DetalleActivity extends AppCompatActivity implements DetalleFragmen
         startActivity(intent);
 
     }
+
+    public void setearViewPager(){
+
+        ControllerListaFragments elControllerListaFragment = new ControllerListaFragments();
+        listaFragments = elControllerListaFragment.generarListaFragments(listaMedia, generoID, tipoMedia);
+
+        // SETEO EL TITULO DE LA ACTIVITY
+        getSupportActionBar().setTitle(TMDBHelper.getNombreGenero(generoID.toString()));
+
+        // TRAIGO EL VIEWPAGER
+        viewPager = (ViewPager) findViewById(R.id.viewPager_fragmentDetalle);
+
+        // INSTANCIO EL ADAPTER
+        DetalleViewPagerAdapter elAdapter = new DetalleViewPagerAdapter(getSupportFragmentManager(), listaFragments);
+
+        // SETEO EL ADAPTER AL VIEWPAGER
+        viewPager.setAdapter(elAdapter);
+
+        // SETEO EL ITEM SELECCIONADO DE LA LISTA COMO CURRENT ITEM
+        viewPager.setCurrentItem(itemActual);
+
+        // AGREGO SEPARACION ENTRE CELDAS
+        viewPager.setClipToPadding(false);
+        viewPager.setPageMargin(2);
+
+    }
+
 }
 
 

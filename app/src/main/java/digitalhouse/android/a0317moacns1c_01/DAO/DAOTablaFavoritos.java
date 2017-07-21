@@ -7,11 +7,14 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import digitalhouse.android.a0317moacns1c_01.Model.Media;
+import digitalhouse.android.a0317moacns1c_01.Utils.HTTPConnectionManager;
 import digitalhouse.android.a0317moacns1c_01.View.Activities.FavoritosActivity;
 
 /**
@@ -26,12 +29,15 @@ public class DAOTablaFavoritos extends DatabaseHelper {
     public static final String USUARIO_ID = "usuario_id";
     public static final Integer ES_FAVORITO = 1;
 
+    private Context context;
+
     public DAOTablaFavoritos(Context context) {
         super(context);
+        this.context = context;
     }
 
 
-    public void insertarFavorito(Context context, String usuarioId, String mediaId){
+    public void insertarFavorito(String usuarioId, String mediaId){
 
         if(!chequearUsuarioYMedia(usuarioId, mediaId)) {
 
@@ -51,6 +57,16 @@ public class DAOTablaFavoritos extends DatabaseHelper {
 
     }
 
+    public void insertarVariosFavoritos(String usuarioId, List<String> listaMediaIDs){
+
+        for (String cadaMediaID : listaMediaIDs){
+
+            insertarFavorito(usuarioId, cadaMediaID);
+
+        }
+
+
+    }
 
     public void eliminarFavorito(String userId, String mediaId){
 
@@ -66,27 +82,16 @@ public class DAOTablaFavoritos extends DatabaseHelper {
 
     public List<Media> obtenerFavoritos(){
 
+
         List<Media>listaFavoritos= new ArrayList<>();
         String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-
-//        String sql= "SELECT * FROM " + NOMBRE_TABLA + " WHERE " + FAVORITO + " = " + 1;
 
         String sql = "SELECT *" +
                 " FROM " + DAOTablaMedia.NOMBRE_TABLA +
                 " LEFT OUTER JOIN " + DAOTablaFavoritos.NOMBRE_TABLA + " ON " + DAOTablaMedia.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID + " = " + DAOTablaFavoritos.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID +
                 " WHERE " + USUARIO_ID + " = '" + userID +
                 "' ORDER BY " + DAOTablaMedia.CALIFICACION + " DESC";
-
-
-//        String query = "SELECT *" +
-//                " FROM " + DAOTablaMedia.NOMBRE_TABLA +
-//                " LEFT OUTER JOIN " + DAOTablaCruce.NOMBRE_TABLA + " ON " + DAOTablaMedia.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID + " = " + DAOTablaCruce.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID +
-//                " LEFT OUTER JOIN " + DAOTablaGeneros.NOMBRE_TABLA + " ON " + DAOTablaCruce.NOMBRE_TABLA + "." + DAOTablaGeneros.GENERO_ID + " = " + DAOTablaGeneros.NOMBRE_TABLA + "." + DAOTablaGeneros.GENERO_ID +
-//                " LEFT OUTER JOIN " + DAOTablaFavoritos.NOMBRE_TABLA + " ON " + DAOTablaMedia.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID + " = " + DAOTablaFavoritos.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID +
-//                " WHERE " + DAOTablaGeneros.NOMBRE_TABLA + "." + DAOTablaGeneros.GENERO_ID + " = " + unGeneroID + " AND " + TIPO + " = \"" + unTipo + "\"" +
-//                " AND (" + DAOTablaFavoritos.USUARIO_ID + " = '" + usuario + "' OR " + DAOTablaFavoritos.USUARIO_ID + " is null)" +
-//                " ORDER BY " + CALIFICACION + " DESC";
 
 
         SQLiteDatabase sqLiteDatabase= getReadableDatabase();
@@ -102,6 +107,7 @@ public class DAOTablaFavoritos extends DatabaseHelper {
             media.setNombre(cursor.getString(cursor.getColumnIndex(DAOTablaMedia.NOMBRE)));
             media.setDescripcion(cursor.getString(cursor.getColumnIndex(DAOTablaMedia.DESCRIPCION)));
             media.setImagen(cursor.getString(cursor.getColumnIndex(DAOTablaMedia.IMAGEN)));
+            media.setVideo(cursor.getString(cursor.getColumnIndex(DAOTablaMedia.VIDEO)));
             media.setFavorito(ES_FAVORITO);
             media.setGeneroID(FavoritosActivity.CODIGO_FAVORITOS);
             media.setCalificacion(cursor.getDouble(cursor.getColumnIndex(DAOTablaMedia.CALIFICACION)));

@@ -8,55 +8,55 @@
             android:icon="@drawable/ic_account_circle_black_24dp"
             android:title="Ingresar usuario" />
 
-    </group>
-
-
-    <group android:id="@+id/navigation_group">
         <item
             android:id="@+id/botonHome"
             android:icon="@drawable/home"
             android:title="Home" />
 
-        <item
-            android:id="@+id/menu_suspenso"
-            android:icon="@drawable/movie"
-            android:title="Suspenso" />
+    </group>
 
-        <item
-            android:id="@+id/menu_accion"
-            android:icon="@drawable/movie"
-            android:title="Acción" />
 
-        <item
-            android:id="@+id/menu_drama"
-            android:icon="@drawable/movie"
-            android:title="Drama" />
 
-        <item
-            android:id="@+id/menu_comedia"
-            android:icon="@drawable/movie"
-            android:title="Comedia" />
+    <group android:id="@+id/navigation_group">
 
-        <item
-            android:id="@+id/menu_romance"
-            android:icon="@drawable/movie"
-            android:title="Romance" />
+        <item android:title="Otros géneros"
+            >
+            <menu>
 
-        <item
-            android:id="@+id/menu_cienciaFiccion"
-            android:icon="@drawable/movie"
-            android:title="Ciencia Ficción" />
+                <item
+                    android:id="@+id/menu_documental"
+                    android:icon="@drawable/movie"
+                    android:title="Documental" />
+
+                <item
+                    android:id="@+id/menu_familia"
+                    android:icon="@drawable/movie"
+                    android:title="Familia" />
+
+                <item
+                    android:id="@+id/menu_historia"
+                    android:icon="@drawable/movie"
+                    android:title="Historia" />
+
+                <item
+                    android:id="@+id/menu_pelitele"
+                    android:icon="@drawable/movie"
+                    android:title="Película de Televisión" />
+
+                <item
+                    android:id="@+id/menu_western"
+                    android:icon="@drawable/movie"
+                    android:title="Western" />
+
+
+            </menu>
+        </item>
 
     </group>
 
 
     <group android:id="@+id/navigation_group3">
 
-  <!--      <item
-            android:id="@+id/menu_recomendados"
-
-           android:title="Recomendados" />
-   -->
 
         <item
             android:id="@+id/menu_favoritos"

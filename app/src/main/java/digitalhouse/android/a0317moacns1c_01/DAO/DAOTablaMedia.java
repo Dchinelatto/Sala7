@@ -28,6 +28,7 @@ public class DAOTablaMedia extends DatabaseHelper{
     public static final String CALIFICACION = "calificacion";
     public static final String IMAGEN = "imagen";
     public static final String TIPO = "serie_o_pelicula";
+    public static final String VIDEO = "video";
     public static final String FAVORITO = "favorito";
     public static final String TRAILER = "trailer";
 
@@ -51,6 +52,7 @@ public class DAOTablaMedia extends DatabaseHelper{
             losValores.put(CALIFICACION, unaMedia.getCalificacion());
 
             losValores.put(TIPO, unTipo);
+            losValores.put(VIDEO, unaMedia.getVideo());
 
             laDB.insert(NOMBRE_TABLA, null, losValores);
 
@@ -105,6 +107,7 @@ public class DAOTablaMedia extends DatabaseHelper{
             laMedia.setDescripcion(elCursor.getString(elCursor.getColumnIndex(DESCRIPCION)));
             laMedia.setImagen(elCursor.getString(elCursor.getColumnIndex(IMAGEN)));
             laMedia.setFavorito(elCursor.getInt(elCursor.getColumnIndex(FAVORITO)));
+            laMedia.setVideo(elCursor.getString(elCursor.getColumnIndex(VIDEO)));
 
             laMedia.setCalificacion(elCursor.getDouble(elCursor.getColumnIndex(CALIFICACION)));
 
@@ -132,7 +135,7 @@ public class DAOTablaMedia extends DatabaseHelper{
 
         SQLiteDatabase laDB = getReadableDatabase();
 
-        String query = "SELECT " + DAOTablaMedia.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID + ", " + DAOTablaMedia.NOMBRE + ", " + DAOTablaMedia.DESCRIPCION + ", " + DAOTablaMedia.IMAGEN + ", " + DAOTablaFavoritos.USUARIO_ID + ", " + DAOTablaMedia.CALIFICACION +
+        String query = "SELECT " + DAOTablaMedia.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID + ", " + DAOTablaMedia.NOMBRE_TABLA + "." + DAOTablaMedia.VIDEO + ", " + DAOTablaMedia.NOMBRE + ", " + DAOTablaMedia.DESCRIPCION + ", " + DAOTablaMedia.IMAGEN + ", " + DAOTablaFavoritos.USUARIO_ID + ", " + DAOTablaMedia.CALIFICACION +
                 " FROM " + DAOTablaMedia.NOMBRE_TABLA +
                 " LEFT OUTER JOIN " + DAOTablaCruce.NOMBRE_TABLA + " ON " + DAOTablaMedia.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID + " = " + DAOTablaCruce.NOMBRE_TABLA + "." + DAOTablaMedia.MEDIA_ID +
                 " LEFT OUTER JOIN " + DAOTablaGeneros.NOMBRE_TABLA + " ON " + DAOTablaCruce.NOMBRE_TABLA + "." + DAOTablaGeneros.GENERO_ID + " = " + DAOTablaGeneros.NOMBRE_TABLA + "." + DAOTablaGeneros.GENERO_ID +
@@ -152,6 +155,7 @@ public class DAOTablaMedia extends DatabaseHelper{
             media.setNombre(elCursor.getString(elCursor.getColumnIndex(NOMBRE)));
             media.setDescripcion(elCursor.getString(elCursor.getColumnIndex(DESCRIPCION)));
             media.setImagen(elCursor.getString(elCursor.getColumnIndex(IMAGEN)));
+            media.setVideo(elCursor.getString(elCursor.getColumnIndex(VIDEO)));
             media.setFavorito(elCursor.getInt(elCursor.getColumnIndex(DAOTablaFavoritos.USUARIO_ID)));
 
             media.setCalificacion(elCursor.getDouble(elCursor.getColumnIndex(CALIFICACION)));
@@ -196,6 +200,7 @@ public class DAOTablaMedia extends DatabaseHelper{
             media.setDescripcion(cursor.getString(cursor.getColumnIndex(DESCRIPCION)));
             media.setImagen(cursor.getString(cursor.getColumnIndex(IMAGEN)));
             media.setFavorito(cursor.getInt(cursor.getColumnIndex(FAVORITO)));
+            media.setVideo(cursor.getString(cursor.getColumnIndex(VIDEO)));
 
             media.setCalificacion(cursor.getDouble(cursor.getColumnIndex(CALIFICACION)));
 

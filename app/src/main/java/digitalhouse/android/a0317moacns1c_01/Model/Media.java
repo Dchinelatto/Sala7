@@ -19,7 +19,7 @@ public class Media {
     public static final String OVERVIEW = "overview";
     public static final String POSTER_PATH = "poster_path";
     public static final String VOTE_AVERAGE = "vote_average";
-    public static final String RUNTIME = "runtime";
+    public static final String VIDEO = "video";
 
 
     // VARIABLES DE LA PELICULA
@@ -43,8 +43,8 @@ public class Media {
     @SerializedName(VOTE_AVERAGE)
     private Double calificacion;
 
-    @SerializedName(RUNTIME)
-    private String duracion;
+    @SerializedName(VIDEO)
+    private String video;
 
     private Integer favorito = 0;
 
@@ -52,6 +52,8 @@ public class Media {
 
 
     // GETTERS Y SETTERS
+
+
     public String getNombre() {
         return nombre;
     }
@@ -68,12 +70,12 @@ public class Media {
         this.id = id;
     }
 
-    public String getTrailer() {
-        return trailer;
+    public List<Integer> getGeneros() {
+        return generos;
     }
 
-    public void setTrailer(String trailer) {
-        this.trailer = trailer;
+    public void setGeneros(List<Integer> generos) {
+        this.generos = generos;
     }
 
     public Integer getGeneroID() {
@@ -108,12 +110,28 @@ public class Media {
         this.calificacion = calificacion;
     }
 
+    public String getVideo() {
+        return video;
+    }
+
+    public void setVideo(String video) {
+        this.video = video;
+    }
+
     public Integer getFavorito() {
         return favorito;
     }
 
     public void setFavorito(Integer favorito) {
         this.favorito = favorito;
+    }
+
+    public String getTrailer() {
+        return trailer;
+    }
+
+    public void setTrailer(String trailer) {
+        this.trailer = trailer;
     }
 
     @Override

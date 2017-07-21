@@ -2,6 +2,7 @@ package digitalhouse.android.a0317moacns1c_01.View.Activities;
 
 import android.content.Intent;
 
+import android.content.SharedPreferences;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -12,27 +13,40 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
+import com.squareup.picasso.Picasso;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.Twitter;
+import com.twitter.sdk.android.core.TwitterApiClient;
 import com.twitter.sdk.android.core.TwitterCore;
+import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.core.identity.TwitterAuthClient;
+import com.twitter.sdk.android.core.models.User;
 
 import java.util.List;
 
+import digitalhouse.android.a0317moacns1c_01.DAO.DAOFirebase;
 import digitalhouse.android.a0317moacns1c_01.DAO.DAOTablaGeneros;
 import digitalhouse.android.a0317moacns1c_01.Model.Media;
 import digitalhouse.android.a0317moacns1c_01.Model.Genero;
+import digitalhouse.android.a0317moacns1c_01.Utils.ResultListener;
 import digitalhouse.android.a0317moacns1c_01.Utils.TMDBHelper;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.GeneroFragment;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.ListaFragment;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.ListaFragmentSeries;
 import digitalhouse.android.a0317moacns1c_01.R;
+import digitalhouse.android.a0317moacns1c_01.View.Fragments.ListaResultados;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.LoginFragment;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.ViewPagerFragment;
 
@@ -46,11 +60,14 @@ public class MainActivity extends AppCompatActivity implements ListaFragment.Rec
     private MenuItem menuItem;
     private ViewPagerFragment viewPagerFragment;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    private MaterialSearchView materialSearchView;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseUser firebaseuser;
 
     private TextView textViewHeaderUsuario;
+    private ImageView imageViewHeaderUsuario;
+
 
     // LISTAS DE PELICULAS
     private List<Genero> listaGeneros;
@@ -60,6 +77,19 @@ public class MainActivity extends AppCompatActivity implements ListaFragment.Rec
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Get the shared preferences
+        SharedPreferences preferences =  getSharedPreferences("my_preferences", MODE_PRIVATE);
+
+        // Check if onboarding_complete is false
+        if(!preferences.getBoolean("onboarding_complete",false)) {
+            // Start the onboarding Activity
+            Intent onboarding = new Intent(this, OnBoardingActivity.class);
+            startActivity(onboarding);
+
+            // Close the main Activity
+            finish();
+            return;
+        }
         Twitter.initialize(this);
         setContentView(R.layout.activity_main);
 
@@ -77,6 +107,7 @@ public class MainActivity extends AppCompatActivity implements ListaFragment.Rec
         // TRAIGO EL HEADER DE LA NAVIGATION
         View view = navigationView.getHeaderView(0);
         textViewHeaderUsuario = (TextView) view.findViewById(R.id.textView_headerUsuario);
+        imageViewHeaderUsuario = (ImageView) view.findViewById(R.id.imageView_imagenUsuario);
 
         // SETEO EL BOTON HAMBURGUESA
         actionBarDrawerToggle= new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.drawer_open,R.string.drawer_close);
@@ -143,33 +174,28 @@ public class MainActivity extends AppCompatActivity implements ListaFragment.Rec
         fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
         switch (item.getItemId()){
-            case (R.id.menu_suspenso):
-                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_SCIENCE_THRILLER));
+            case (R.id.menu_documental):
+                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_DOCUMENTARY));
                 elFragment.setArguments(elBundle);
                 fragmentTransaction.replace(R.id.frameLayout_fragmentList, elFragment);
                 break;
-            case (R.id.menu_accion):
-                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_ACTION));
+            case (R.id.menu_familia):
+                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_FAMILY));
                 elFragment.setArguments(elBundle);
                 fragmentTransaction.replace(R.id.frameLayout_fragmentList, elFragment);
                 break;
-            case (R.id.menu_drama):
-                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_DRAMA));
+            case (R.id.menu_historia):
+                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_HISTORY));
                 elFragment.setArguments(elBundle);
                 fragmentTransaction.replace(R.id.frameLayout_fragmentList, elFragment);
                 break;
-            case (R.id.menu_comedia):
-                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_COMEDY));
+            case (R.id.menu_pelitele):
+                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_SCIENCE_TV_MOVIE));
                 elFragment.setArguments(elBundle);
                 fragmentTransaction.replace(R.id.frameLayout_fragmentList, elFragment);
                 break;
-            case (R.id.menu_romance):
-                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_ROMANCE));
-                elFragment.setArguments(elBundle);
-                fragmentTransaction.replace(R.id.frameLayout_fragmentList, elFragment);
-                break;
-            case (R.id.menu_cienciaFiccion):
-                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_SCIENCE_FICTION));
+            case (R.id.menu_western):
+                elBundle.putInt(DAOTablaGeneros.GENERO_ID, Integer.parseInt(TMDBHelper.MOVIE_GENRE_SCIENCE_WESTERN));
                 elFragment.setArguments(elBundle);
                 fragmentTransaction.replace(R.id.frameLayout_fragmentList, elFragment);
                 break;
@@ -178,8 +204,17 @@ public class MainActivity extends AppCompatActivity implements ListaFragment.Rec
                 break;
 
             case (R.id.menu_favoritos):
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
+                if(firebaseuser != null){
+
+                    Intent intent = new Intent(this, FavoritosActivity.class);
+                    intent.putExtra(FavoritosActivity.FAV_O_RECOM, "favoritos");
+                    startActivity(intent);
+                } else {
+
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    startActivity(intent);
+
+                }
 
                 break;
             case (R.id.botonHome):
@@ -232,17 +267,15 @@ public class MainActivity extends AppCompatActivity implements ListaFragment.Rec
 
     public void checkUser(){
 
-
         if(firebaseuser != null){
 
             firebaseAuth.signOut();
+            Toast.makeText(this, "Se cerró la sesión exitosamente", Toast.LENGTH_SHORT).show();
             firebaseuser = firebaseAuth.getCurrentUser();
-            navigationView.getMenu().getItem(0).setTitle("Loguearse");
-            textViewHeaderUsuario.setText("");
+            ocultarViewsNavigationHeader();
 
         } else {
 
-            navigationView.getMenu().getItem(0).setTitle("Cerrar Sesión");
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
         }
@@ -253,13 +286,23 @@ public class MainActivity extends AppCompatActivity implements ListaFragment.Rec
 
 
         if(firebaseuser != null){
-            navigationView.getMenu().getItem(0).setTitle("Cerrar Sesión");
+            mostrarViewsNavigationHeader();
             textViewHeaderUsuario.setText(firebaseuser.getDisplayName());
+
+            DAOFirebase daoFirebase = new DAOFirebase();
+            daoFirebase.obtenerFotoFirebase(firebaseuser.getUid(), new ResultListener<String>() {
+                @Override
+                public void finish(String resultado) {
+                    Picasso.with(MainActivity.this).load(resultado).noFade().into(imageViewHeaderUsuario);
+                }
+            });
+
+
+
 
         } else {
 
-            navigationView.getMenu().getItem(0).setTitle("Loguearse");
-            textViewHeaderUsuario.setText("");
+            ocultarViewsNavigationHeader();
         }
 
     }
@@ -276,6 +319,81 @@ public class MainActivity extends AppCompatActivity implements ListaFragment.Rec
         super.onStart();
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseuser = firebaseAuth.getCurrentUser();
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_action_bar_main,menu);
+
+        menuItem= menu.findItem(R.id.busquedaItem);
+
+        materialSearchView= (MaterialSearchView) findViewById(R.id.material_search_view);
+
+        materialSearchView.setMenuItem(menuItem);
+
+        materialSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+
+            @Override
+
+            public boolean onQueryTextSubmit(String query) {
+
+
+
+                return true;
+
+            }
+
+
+
+            @Override
+            //LA BUSQUEDA CAMBIA A MEDIDA QUE SE VA ESCRIBIENDO
+            public boolean onQueryTextChange(String newText) {
+
+                ListaResultados listaResultados= new ListaResultados();
+
+                //REEMPLAZO LOS ESPACIOS PARA QUE EN LA BUSQUEDA CONSIDERE LOS ESPACIOS ENTRE PALABRAS
+                newText= newText.replaceAll(" ","%20");
+                Bundle bundle= new Bundle();
+                bundle.putString("busqueda",newText);
+                listaResultados.setArguments(bundle);
+                FragmentTransaction fragmentTransaction= getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.frameLayout_fragmentList,listaResultados);
+                fragmentTransaction.commit();
+
+                return true;
+            }
+        });
+
+
+        materialSearchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+
+            @Override
+
+            public void onSearchViewShown() {}
+
+            @Override
+            public void onSearchViewClosed() {
+
+                viewPagerFragment = new ViewPagerFragment();
+                FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.frameLayout_fragmentList, viewPagerFragment);
+                fragmentTransaction.commit();
+            }});
+
+        return true;
+    }
+
+    public void ocultarViewsNavigationHeader(){
+        navigationView.getMenu().getItem(0).setTitle("Loguearse");
+        textViewHeaderUsuario.setVisibility(View.GONE);
+        imageViewHeaderUsuario.setVisibility(View.GONE);
+    }
+
+    public void mostrarViewsNavigationHeader(){
+        navigationView.getMenu().getItem(0).setTitle("Cerrar Sesión");
+        textViewHeaderUsuario.setVisibility(View.VISIBLE);
+        imageViewHeaderUsuario.setVisibility(View.VISIBLE);
     }
 }
 

@@ -27,7 +27,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 DAOTablaMedia.CALIFICACION + " REAL, " +
                 DAOTablaMedia.IMAGEN + " TEXT, " +
                 DAOTablaMedia.FAVORITO + " TEXT, " +
-                DAOTablaMedia.TIPO + " TEXT" +
+                DAOTablaMedia.TIPO + " TEXT, " +
+                DAOTablaMedia.VIDEO + " TEXT, " +
                 DAOTablaMedia.TRAILER + " TEXT)";
 
         String query2 = "CREATE TABLE " + DAOTablaGeneros.NOMBRE_TABLA + " (" +

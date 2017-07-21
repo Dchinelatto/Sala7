@@ -8,17 +8,20 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import digitalhouse.android.a0317moacns1c_01.Controller.ControllerMedia;
 import digitalhouse.android.a0317moacns1c_01.DAO.DAOTablaMedia;
 import digitalhouse.android.a0317moacns1c_01.Model.Media;
 import digitalhouse.android.a0317moacns1c_01.R;
+import digitalhouse.android.a0317moacns1c_01.Utils.ResultListener;
 import digitalhouse.android.a0317moacns1c_01.Utils.TMDBHelper;
 import digitalhouse.android.a0317moacns1c_01.View.Adapters.GeneroAdapter;
 import digitalhouse.android.a0317moacns1c_01.View.Fragments.ListaFragment;
@@ -32,6 +35,7 @@ public class FavoritosActivity extends AppCompatActivity implements ListaFragmen
     // ATRIBUTOS
     private GeneroAdapter generoAdapter= new GeneroAdapter(this);
     private List<Media> listaFavoritos;
+    private TextView textViewNoHayFavoritos;
     private RecyclerView recyclerViewFavoritos;
     private String eleccion = "";
     private ListaFragment.ReceptorMedia receptorMedia;
@@ -41,32 +45,49 @@ public class FavoritosActivity extends AppCompatActivity implements ListaFragmen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favoritos);
 
+        textViewNoHayFavoritos = (TextView) findViewById(R.id.textView_noHayFavoritos);
+        textViewNoHayFavoritos.setVisibility(View.GONE);
+
         Intent laIntent = getIntent();
         eleccion = laIntent.getStringExtra(FAV_O_RECOM);
 
+        listaFavoritos = new ArrayList<>();
         ControllerMedia controllerMedia= new ControllerMedia(this);
-        listaFavoritos= controllerMedia.obtenerListaFavoritos();
-
-        recyclerViewFavoritos= (RecyclerView) findViewById(R.id.recyclerview_Favoritos);
-        generoAdapter= new GeneroAdapter(this);
-
-        // SETEO EL LISTENER
-        generoAdapter.setListener(new View.OnClickListener() {
-
+        controllerMedia.obtenerListaFavoritos(new ResultListener<List<Media>>() {
             @Override
-            public void onClick(View view) {
-                Integer posicion = recyclerViewFavoritos.getChildAdapterPosition(view);
-                Media laMedia = listaFavoritos.get(posicion);
-                recibirMedia(laMedia,posicion,"serie", CODIGO_FAVORITOS);
-            }
+            public void finish(List<Media> resultado) {
+                for(Media cadaMedia : resultado){
+                    listaFavoritos.add(cadaMedia);
+                }
 
+
+                recyclerViewFavoritos= (RecyclerView) findViewById(R.id.recyclerview_Favoritos);
+                generoAdapter= new GeneroAdapter(FavoritosActivity.this);
+
+                // SETEO EL LISTENER
+                generoAdapter.setListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        Integer posicion = recyclerViewFavoritos.getChildAdapterPosition(view);
+                        Media laMedia = listaFavoritos.get(posicion);
+                        recibirMedia(laMedia,posicion,"serie", CODIGO_FAVORITOS);
+                    }
+
+                });
+
+
+                generoAdapter.setListaMedia(listaFavoritos);
+                recyclerViewFavoritos.setAdapter(generoAdapter);
+                generoAdapter.notifyDataSetChanged();
+                recyclerViewFavoritos.setLayoutManager(new LinearLayoutManager(FavoritosActivity.this,LinearLayoutManager.VERTICAL,false));
+
+                ocultarViewCorrecta();
+            }
         });
 
 
-        generoAdapter.setListaMedia(listaFavoritos);
-        recyclerViewFavoritos.setAdapter(generoAdapter);
-        generoAdapter.notifyDataSetChanged();
-        recyclerViewFavoritos.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
+
 
     }
 
@@ -96,6 +117,17 @@ public class FavoritosActivity extends AppCompatActivity implements ListaFragmen
     public void onBackPressed() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+
+    public void ocultarViewCorrecta(){
+        if(listaFavoritos.size() == 0){
+            textViewNoHayFavoritos.setVisibility(View.VISIBLE);
+            recyclerViewFavoritos.setVisibility(View.GONE);
+        } else {
+            textViewNoHayFavoritos.setVisibility(View.GONE);
+            recyclerViewFavoritos.setVisibility(View.VISIBLE);
+        }
     }
 
 }
